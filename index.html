@@ -59,16 +59,29 @@
             // objeto que armazena os jogadores e itens
             const state = {
                 players: [
-                    { name: 'p_1', position: { x: 1, y: 2 } },
-                    { name: 'p_2', position: { x: 9, y: 9 } },
+                    // { name: 'p_1', position: { x: 1, y: 2 } },
+                    // { name: 'p_2', position: { x: 9, y: 9 } },
                 ],
                 fruits: [
-                    { position: { x: 5, y: 5 } }
+                    // { position: { x: 5, y: 5 } }
                 ],
                 canvasSize: {
                     width: canvasSize !== undefined ? canvasSize.width : 25,
                     height: canvasSize !== undefined ? canvasSize.height : 10
                 }
+            }
+
+            function addPlayer(command) {
+                state.players.push({
+                    name: command.name,
+                    position: command.position
+                })
+                notify(state)
+            }
+
+            function removePlayer(command) {
+                state.players.splice(command.playerId, 1)
+                notify(state)
             }
 
             const observers = []
@@ -100,9 +113,6 @@
                 const keyPressed = command.keyPressed
                 const player = state.players[command.playerId]
 
-                // debug
-                console.log(keyPressed)
-
                 const acceptedMoves = {
                     ArrowUp(player) {
                         player.position.y - 1 >= 0 ? player.position.y -= 1 : ''
@@ -121,7 +131,7 @@
 
                 const moveFunction = acceptedMoves[keyPressed]
 
-                if (moveFunction) {
+                if (player && moveFunction) {
                     moveFunction(player)
                 }
                 notify(state)
@@ -132,7 +142,9 @@
                 movePlayer,
                 subscribe,
                 updateCanvasSize,
-                getCanvasSize
+                getCanvasSize,
+                addPlayer,
+                removePlayer
             }
         }
 
