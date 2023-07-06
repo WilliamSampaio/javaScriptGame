@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game</title>
+    <style>
+        #screen {
+            background-color: cadetblue;
+            border: 10px solid slateblue;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            image-rendering: -moz-crisp-edges;
+            width: 500px;
+            height: 500px;
+        }
+
+        .label {
+            margin: 0%;
+            padding-top: 230px;
+            position: absolute;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: x-large;
+            font-weight: bold;
+            color: brown;
+            width: 520px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <p class="label"></p>
+    <canvas id="screen" width="10" height="10"></canvas>
+    <script type="text/javascript">
+        const currentPlayerIndex = 0
+
+        function createGame() {
+            // objeto que armazena os jogadores e itens
+            const state = {
+                players: [
+                    { name: 'p_1', position: { x: 1, y: 2 } },
+                    { name: 'p_2', position: { x: 9, y: 9 } },
+                ],
+                fruits: [
+                    { position: { x: 5, y: 5 } }
+                ]
+            }
+            const observers = []
+
+            // add a observer
+            function subscribe(observerFunction) {
+                observers.push(observerFunction)
+            }
+
+            // notify a observer
+            function notify(command) {
+                for (const observerFunction of observers) {
+                    observerFunction(command)
+                }
+            }
+
+            // metodo que atualiza a posicao de player
+            function movePlayer(command) {
+                const keyPressed = command.keyPressed
+                const player = state.players[command.playerId]
+
+                switch (keyPressed) {
+                    case 'ArrowUp':
+                        player.position.y - 1 >= 0 ? player.position.y -= 1 : ''
+                        break
+                    case 'ArrowRight':
+                        player.position.x + 1 < 10 ? player.position.x += 1 : ''
+                        break
+                    case 'ArrowDown':
+                        player.position.y + 1 < 10 ? player.position.y += 1 : ''
+                        break
+                    case 'ArrowLeft':
+                        player.position.x - 1 >= 0 ? player.position.x -= 1 : ''
+                        break
+                }
+
+                notify(state)
+            }
+
+            // retorna os artefatos
+            return {
+                movePlayer,
+                state,
+                subscribe
+            }
+        }
+
+        function createKeyboradListener() {
+            // objeto que armazena os observers
+            const state = {
+                observers: []
+            }
+
+            // add a observer
+            function subscribe(observerFunction) {
+                state.observers.push(observerFunction)
+            }
+
+            // notify a observer
+            function notify(command) {
+                for (const observerFunction of state.observers) {
+                    observerFunction(command)
+                }
+            }
+
+            // add um listener
+            document.addEventListener('keydown', handleKeyDown)
+
+            // metodo que captura o input e notifica
+            function handleKeyDown(event) {
+                const keyPressed = event.key
+
+                const command = {
+                    playerId: currentPlayerIndex,
+                    keyPressed
+                }
+
+                notify(command)
+            }
+
+            return { subscribe }
+        }
+
+        function createScreen() {
+            const label = document.getElementsByClassName('label')[0]
+
+            const screen = document.getElementById('screen')
+            const context = screen.getContext('2d')
+
+            function writeLabel(text) {
+                label.textContent = text
+            }
+
+            function renderScreen(gameState) {
+                writeLabel('')
+                context.clearRect(0, 0, 10, 10)
+
+                gameState.players.forEach(player => {
+                    context.fillStyle = '#DDD'
+                    context.fillRect(player.position.x, player.position.y, 1, 1)
+                })
+                gameState.fruits.forEach(fruit => {
+                    context.fillStyle = 'green'
+                    context.fillRect(fruit.position.x, fruit.position.y, 1, 1)
+                })
+                // requestAnimationFrame(renderScreen)
+            }
+
+            return { renderScreen, writeLabel }
+        }
+
+        const screen = createScreen()
+        screen.writeLabel('Enter to Start...')
+
+        const game = createGame()
+        game.subscribe(screen.renderScreen)
+        
+        const keyboradListener = createKeyboradListener()
+        keyboradListener.subscribe(game.movePlayer)
+    </script>
+</body>
+
+</html>
