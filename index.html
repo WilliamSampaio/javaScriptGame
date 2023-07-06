@@ -10,11 +10,11 @@
     <style>
         #screen {
             background-color: #5f9ea07e;
-            border: 1px solid rgba(105, 90, 205, 0.574);
+            border: 3px solid rgba(105, 90, 205, 0.574);
             image-rendering: pixelated;
             image-rendering: crisp-edges;
             image-rendering: -moz-crisp-edges;
-            width: 400px;
+            width: 100%;
         }
 
         #label {
@@ -30,7 +30,7 @@
 <body>
     <div class="container text-center">
         <br>
-        <div class="row mb-3">
+        <div class="row justify-content-md-center mb-3">
             <label class="col-4 col-form-label">Tamanho:</label>
             <div class="col-3">
                 <input type="number" max="100" class="form-control form-control-sm" id="inputWidth">
@@ -66,7 +66,7 @@
                     { position: { x: 5, y: 5 } }
                 ],
                 canvasSize: {
-                    width: canvasSize !== undefined ? canvasSize.width : 10,
+                    width: canvasSize !== undefined ? canvasSize.width : 25,
                     height: canvasSize !== undefined ? canvasSize.height : 10
                 }
             }
@@ -98,7 +98,6 @@
             // metodo que atualiza a posicao de player
             function movePlayer(command) {
                 const keyPressed = command.keyPressed
-                const canvasSize = command.canvasSize
                 const player = state.players[command.playerId]
 
                 // debug
@@ -109,10 +108,10 @@
                         player.position.y - 1 >= 0 ? player.position.y -= 1 : ''
                     },
                     ArrowRight(player) {
-                        player.position.x + 1 < canvasSize.width ? player.position.x += 1 : ''
+                        player.position.x + 1 < state.canvasSize.width ? player.position.x += 1 : ''
                     },
                     ArrowDown(player) {
-                        player.position.y + 1 < canvasSize.height ? player.position.y += 1 : ''
+                        player.position.y + 1 < state.canvasSize.height ? player.position.y += 1 : ''
                     },
                     ArrowLeft(player) {
                         player.position.x - 1 >= 0 ? player.position.x -= 1 : ''
@@ -121,7 +120,10 @@
                 }
 
                 const moveFunction = acceptedMoves[keyPressed]
-                moveFunction(player)
+
+                if (moveFunction) {
+                    moveFunction(player)
+                }
                 notify(state)
             }
 
@@ -161,8 +163,7 @@
 
                 const command = {
                     playerId: currentPlayerIndex,
-                    keyPressed,
-                    canvasSize: canvasSize
+                    keyPressed
                 }
 
                 notify(command)
@@ -206,6 +207,8 @@
                 })
                 // requestAnimationFrame(renderScreen)
             }
+
+            updateSize({ width: 25, height: 10 })
 
             return { renderScreen, writeLabel }
         }
