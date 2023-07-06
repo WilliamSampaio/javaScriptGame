@@ -92,7 +92,7 @@
             }
 
             function removeFruit(command) {
-                state.players.splice(command.fruitId, 1)
+                state.fruits.splice(command.fruitId, 1)
                 notify(state)
             }
 
@@ -157,6 +157,7 @@
                             state.players[playerId].position.x == state.fruits[fruitId].position.x &&
                             state.players[playerId].position.y == state.fruits[fruitId].position.y
                         ) {
+                            removeFruit({fruitId: fruitId})
                             return true
                         }
                     }
