@@ -25,6 +25,7 @@
             text-align: center;
         }
     </style>
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
@@ -65,21 +66,34 @@
         const screen = document.getElementById('screen')
         renderScreen(screen, game, requestAnimationFrame)
 
-        game.addPlayer({ name: 'William', position: { x: 0, y: 0 } })
-        game.addFruit({ position: { x: 10, y: 5 } })
+        // game.addPlayer({ name: 'William', position: { x: 0, y: 0 } })
+        // game.addFruit({ position: { x: 10, y: 5 } })
 
-        document.addEventListener('DOMContentLoaded', function () {
-            $("#inputWidth").val(game.canvas.width)
-            $("#inputHeight").val(game.canvas.height)
+        const socket = io()
+
+        socket.on('connect', () => {
+            const playerId = socket.id
+            console.log('Client: Player conectado! ' + playerId)
         })
 
-        $("#inputWidth").change(function () {
-            game.canvas.width = $(this).val()
+        socket.on('setup', (state)=>{
+            game.players = state.players
+            game.fruits = state.fruits
+            game.canvas = state.canvas
         })
 
-        $("#inputHeight").change(function () {
-            game.canvas.height = $(this).val()
-        })
+        // document.addEventListener('DOMContentLoaded', function () {
+        //     $("#inputWidth").val(game.canvas.width)
+        //     $("#inputHeight").val(game.canvas.height)
+        // })
+
+        // $("#inputWidth").change(function () {
+        //     game.canvas.width = $(this).val()
+        // })
+
+        // $("#inputHeight").change(function () {
+        //     game.canvas.height = $(this).val()
+        // })
     </script>
 </body>
 
