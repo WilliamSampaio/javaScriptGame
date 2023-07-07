@@ -51,243 +51,34 @@
         integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
         crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-    <script type="text/javascript">
+    <script type="module">
+        import createGame from './game.js'
+        import createKeyboardListener from './keyboardListener.js'
+        import renderScreen from './screen.js'
 
         const currentPlayerIndex = 0
 
-        function createGame(canvasSize) {
-            // objeto que armazena os jogadores e itens
-            const state = {
-                players: [
-                    // { name: 'p_1', position: { x: 1, y: 2 } },
-                    // { name: 'p_2', position: { x: 9, y: 9 } },
-                ],
-                fruits: [
-                    // { position: { x: 5, y: 5 } }
-                ],
-                canvasSize: {
-                    width: canvasSize !== undefined ? canvasSize.width : 25,
-                    height: canvasSize !== undefined ? canvasSize.height : 10
-                }
-            }
-
-            function addPlayer(command) {
-                state.players.push({
-                    name: command.name,
-                    position: command.position
-                })
-                notify(state)
-            }
-
-            function removePlayer(command) {
-                state.players.splice(command.playerId, 1)
-                notify(state)
-            }
-
-            function addFruit(command) {
-                state.fruits.push({
-                    position: command.position
-                })
-                notify(state)
-            }
-
-            function removeFruit(command) {
-                state.fruits.splice(command.fruitId, 1)
-                notify(state)
-            }
-
-            const observers = []
-
-            // add a observer
-            function subscribe(observerFunction) {
-                observers.push(observerFunction)
-            }
-
-            // notify a observer
-            function notify(command) {
-                for (const observerFunction of observers) {
-                    observerFunction(command)
-                }
-            }
-
-            function updateCanvasSize(canvasSize) {
-                canvasSize.width > 100 ? state.canvasSize.width = 100 : state.canvasSize.width = canvasSize.width
-                canvasSize.height > 100 ? state.canvasSize.height = 100 : state.canvasSize.height = canvasSize.height
-                notify(state)
-            }
-
-            function getCanvasSize() {
-                return state.canvasSize
-            }
-
-            // metodo que atualiza a posicao de player
-            function movePlayer(command) {
-                const keyPressed = command.keyPressed
-                const player = state.players[command.playerId]
-
-                const acceptedMoves = {
-                    ArrowUp(player) {
-                        player.position.y - 1 >= 0 ? player.position.y -= 1 : ''
-                    },
-                    ArrowRight(player) {
-                        player.position.x + 1 < state.canvasSize.width ? player.position.x += 1 : ''
-                    },
-                    ArrowDown(player) {
-                        player.position.y + 1 < state.canvasSize.height ? player.position.y += 1 : ''
-                    },
-                    ArrowLeft(player) {
-                        player.position.x - 1 >= 0 ? player.position.x -= 1 : ''
-                    },
-                    Enter() { }
-                }
-
-                const moveFunction = acceptedMoves[keyPressed]
-
-                if (player && moveFunction) {
-                    moveFunction(player)
-                    checkCollision()
-                }
-                notify(state)
-            }
-
-            function checkCollision() {
-                for (const playerId in state.players) {
-                    for (const fruitId in state.fruits) {
-                        if (
-                            state.players[playerId].position.x == state.fruits[fruitId].position.x &&
-                            state.players[playerId].position.y == state.fruits[fruitId].position.y
-                        ) {
-                            removeFruit({fruitId: fruitId})
-                            return true
-                        }
-                    }
-                }
-                return false
-            }
-
-            // retorna os artefatos
-            return {
-                movePlayer,
-                subscribe,
-                updateCanvasSize,
-                getCanvasSize,
-                addPlayer,
-                removePlayer,
-                addFruit,
-                removeFruit,
-                state
-            }
-        }
-
-        function createKeyboradListener() {
-            // objeto que armazena os observers
-            const state = {
-                observers: []
-            }
-
-            // add a observer
-            function subscribe(observerFunction) {
-                state.observers.push(observerFunction)
-            }
-
-            // notify a observer
-            function notify(command) {
-                for (const observerFunction of state.observers) {
-                    observerFunction(command)
-                }
-            }
-
-            // add um listener
-            document.addEventListener('keydown', handleKeyDown)
-
-            // metodo que captura o input e notifica
-            function handleKeyDown(event) {
-                const keyPressed = event.key
-
-                const command = {
-                    playerId: currentPlayerIndex,
-                    keyPressed
-                }
-
-                notify(command)
-            }
-
-            return { subscribe }
-        }
-
-        function createScreen(canvasId) {
-            const state = {
-                screen: document.getElementById(canvasId),
-                label: document.getElementById('label')
-            }
-
-            function updateSize(canvasSize) {
-                state.screen.setAttribute('width', canvasSize.width)
-                state.screen.setAttribute('height', canvasSize.height)
-            }
-
-            function getContext() {
-                return state.screen.getContext('2d')
-            }
-
-            function writeLabel(text) {
-                state.label.textContent = text
-            }
-
-            function renderScreen(gameState) {
-                updateSize(gameState.canvasSize)
-                writeLabel('')
-                context = getContext()
-                context.clearRect(0, 0, gameState.canvasSize.width, gameState.canvasSize.height)
-
-                gameState.players.forEach(player => {
-                    context.fillStyle = 'yellow'
-                    context.fillRect(player.position.x, player.position.y, 1, 1)
-                })
-                gameState.fruits.forEach(fruit => {
-                    context.fillStyle = 'green'
-                    context.fillRect(fruit.position.x, fruit.position.y, 1, 1)
-                })
-                // requestAnimationFrame(renderScreen)
-            }
-
-            updateSize({ width: 25, height: 10 })
-
-            return { renderScreen, writeLabel }
-        }
-
-        const screen = createScreen('screen')
-        screen.writeLabel('Enter to Start...')
-
         const game = createGame()
-        game.subscribe(screen.renderScreen)
+        const keyboradListener = createKeyboardListener(document)
+        keyboradListener.subscribe(game.movePlayer)
+
+        const screen = document.getElementById('screen')
+        renderScreen(screen, game, requestAnimationFrame)
 
         game.addPlayer({ name: 'William', position: { x: 0, y: 0 } })
         game.addFruit({ position: { x: 10, y: 5 } })
 
-        const keyboradListener = createKeyboradListener()
-        keyboradListener.subscribe(game.movePlayer)
-
         document.addEventListener('DOMContentLoaded', function () {
-            canvasSize = game.getCanvasSize()
-            $("#inputWidth").val(canvasSize.width)
-            $("#inputHeight").val(canvasSize.height)
+            $("#inputWidth").val(game.canvas.width)
+            $("#inputHeight").val(game.canvas.height)
         })
 
         $("#inputWidth").change(function () {
-            canvasSize = {
-                width: $(this).val(),
-                height: $("#inputHeight").val()
-            }
-            game.updateCanvasSize(canvasSize)
+            game.canvas.width = $(this).val()
         })
 
         $("#inputHeight").change(function () {
-            canvasSize = {
-                width: $("#inputWidth").val(),
-                height: $(this).val()
-            }
-            game.updateCanvasSize(canvasSize)
+            game.canvas.height = $(this).val()
         })
     </script>
 </body>
