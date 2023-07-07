@@ -1,0 +1,23 @@
+{
+  "name": "javascriptgame",
+  "version": "1.0.0",
+  "description": "studying the potential of JavaScript in game development",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WilliamSampaio/javaScriptGame.git"
+  },
+  "author": "William Sampaio",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WilliamSampaio/javaScriptGame/issues"
+  },
+  "homepage": "https://github.com/WilliamSampaio/javaScriptGame#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
